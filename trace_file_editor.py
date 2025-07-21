@@ -28,7 +28,7 @@ class trace_editor():
         self.number_bar.grid(row = 0, column= 0, sticky="news")
 
 
-        self.code_bar = Canvas(self.container, width = 400)
+        self.code_bar = Canvas(self.container, width = 400, bg = "white")
         self.code_bar.grid(row = 0, column = 1, sticky="nsew")
        
         self.scroll = Scrollbar(self.container, orient=VERTICAL, command=self.scroll_both)
@@ -40,13 +40,22 @@ class trace_editor():
         self.open_button = Button(self.container, text="Open File", command=self.open_file)
         self.open_button.grid(row = 0, column = 3)
        
+        self.code_bar.bind_all("<MouseWheel>", self.mouse_scroll)
+        self.number_bar.bind_all("<MouseWheel>", self.mouse_scroll)
         
+    def mouse_scroll(self,event):
+        if event.delta:
+            self.code_bar.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            self.number_bar.yview_scroll(int(-1 * (event.delta / 120)), "units")
         
     def scroll_both(self, *args):
         self.code_bar.yview(*args)
         self.number_bar.yview(*args)
         
     def open_file(self):
+        self.code_bar.delete("all")
+        self.number_bar.delete("all")
+                
         self.file_path = filedialog.askopenfilename(
             title = "Select a file  ",
             filetypes = [("Text files", "*.txt"), ("All files", "*.*")]
@@ -55,21 +64,26 @@ class trace_editor():
             with open(self.file_path, "r") as file:
                 self.file_content = file.read()
        
-        y = 10  # initial y position
-        for line in self.file_content.splitlines():
-            self.code_bar.create_text(10, y, anchor="nw", text=line, font="Arial 12")
-            y += 20  # move to next line
+        
+        self.lines = self.file_content.splitlines()
+        line_height = 20
+        y = 0
 
+        for i, line in enumerate(self.lines):
+            # Draw code line
+            self.code_bar.create_text(5, y, anchor="nw", text=line, font="Arial 12")
 
-        y = 10  # initial y position
-        for i in range(len(self.file_content.splitlines())):
-            self.number_bar.create_text(10, y, anchor="nw", text=str(i + 1), font="Arial 12")
-            y += 20  # move to next line    
-            self.number_bar.create_line(49, 0,  49, i, fill = "black")
+            # Draw corresponding line number
+            self.number_bar.create_text(5, y, anchor="nw", text=str(i + 1), font="Arial 12")
 
-        # Update scroll region
-        self.number_bar.configure(scrollregion=self.number_bar.bbox("all"))
-        self.code_bar.configure(scrollregion=self.code_bar.bbox("all"))
+            y += line_height
+
+        # Draw vertical separator line in number_bar
+        self.number_bar.create_line(49, 0, 49, y, fill="black")
+
+        # Update scroll region so scrollbars work correctly
+        self.code_bar.configure(scrollregion=(0, 0, 400, y))
+        self.number_bar.configure(scrollregion=(0, 0, 50, y))
            
     def run(self):
         self.root.mainloop()
