@@ -50,20 +50,41 @@ class trace_editor():
 
         self.button_container = Frame(self.container)
         self.button_container.grid(row=2, column= 3, sticky="news")
+        self.button_container.columnconfigure(0, weight= 1, pad = 10)
+        self.button_container.columnconfigure(1, weight= 1, pad = 10)
         
         self.open_button = Button(self.button_container, text="Open File", command=self.open_file)
         self.open_button.grid(row = 0, column = 0, columnspan= 2)
         
-        self.redundant = Button(self.button_container, text = "remove redundant code")
-        self.redundant.grid(row = 1, column= 1)
+        self.redundant = Button(self.button_container, text = "remove redundant code", command=self.remove)
+        self.redundant.grid(row = 1, column= 1, sticky="news", padx=10, pady=5)
         
-        self.retract_inp = Entry(self.button_container, text = "enter retraction height")
-        self.retract_inp.grid(row= 2, column= 0)
+        self.retract_inp = Entry(self.button_container)
+        self.retract_inp.grid(row= 2, column= 0, sticky="news", padx=10, pady=5)
         self.retract_button = Button(self.button_container, text = "set retraction height")
-        self.retract_button.grid(row = 2, column= 1)
+        self.retract_button.grid(row = 2, column= 1, sticky="news", padx=10, pady=5)
        
+        self.trace_feed_inp = Entry(self.button_container)
+        self.trace_feed_inp.grid(row= 3, column= 0, sticky="news", padx=10, pady=5)
+        self.trace_feed_button = Button(self.button_container, text = "set trace feed rate")
+        self.trace_feed_button.grid(row = 3, column= 1, sticky="news", padx=10, pady=5)
         
+        self.RPM_inp = Entry(self.button_container)
+        self.RPM_inp.grid(row= 4, column= 0, sticky="news", padx=10, pady=5)
+        self.RPM_button = Button(self.button_container, text = "set Drill RPM")
+        self.RPM_button.grid(row = 4, column= 1, sticky="news", padx=10, pady=5)
         
+        self.carrige_speed_inp = Entry(self.button_container)
+        self.carrige_speed_inp.grid(row= 5, column= 0, sticky="news", padx=10, pady=5)
+        self.carrige_speed_button = Button(self.button_container, text = "set carrige speed")
+        self.carrige_speed_button.grid(row = 5, column= 1, sticky="news", padx=10, pady=5)
+        
+        self.new_name = Label(self.button_container, text = "New file name", font = self.style)
+        self.new_name.grid(row = 6, column= 0, sticky="news", padx=10, pady=5)
+        self.new_name_inp = Entry(self.button_container)
+        self.new_name_inp.grid(row= 7, column= 0, sticky="news", padx=10, pady=5)
+        self.new_name_button = Button(self.button_container, text = "Export as new file")
+        self.new_name_button.grid(row = 7, column= 1, sticky="news", padx=10, pady=5)
         
         
     def mouse_scroll(self,event):
@@ -86,9 +107,12 @@ class trace_editor():
         if self.file_path:
             with open(self.file_path, "r") as file:
                 self.file_content = file.read()
-       
-        
         self.lines = self.file_content.splitlines()
+        self.display()
+        
+    def display(self):    
+        self.code_bar.delete("all")
+        self.number_bar.delete("all")
         line_height = 20
         y = 0
 
@@ -107,7 +131,15 @@ class trace_editor():
         # Update scroll region so scrollbars work correctly
         self.code_bar.configure(scrollregion=(0, 0, 400, y))
         self.number_bar.configure(scrollregion=(0, 0, 50, y))
-           
+    
+    def remove(self):
+        for i in self.lines:
+            if i == "MO3":
+                break
+            else:
+                self.lines.remove(i)
+        self.display()   
+  
     def run(self):
         self.root.mainloop()
        
