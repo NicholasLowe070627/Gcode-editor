@@ -17,31 +17,54 @@ class trace_editor():
         self.root.geometry("800x800")
         self.root.rowconfigure(0, weight = 1)
         self.root.columnconfigure(0, weight = 1)
-        self.style = "Arial 30"
+        self.style = "Arial 12"
        
         self.container = Frame(self.root)
         self.container.grid(sticky="news", row = 0, column = 0)
         self.container.rowconfigure(0, weight=1)
-        self.container.columnconfigure(1, weight=1)
+        self.container.rowconfigure(2, weight=17)
+        self.container.columnconfigure(1, weight=3)
+        self.container.columnconfigure(3, weight =2 )
+        
+        
+        
+        self.title = Label(self.container, text = "Trace file editor", font = self.style)
+        self.title.grid(row = 0, column= 1, columnspan = 4)
+
+        self.spacer = Frame(self.container, bg = "black")
+        self.spacer.grid(row =1 ,column=0, columnspan= 4, sticky= "news")
         
         self.number_bar = Canvas(self.container, width = 50)
-        self.number_bar.grid(row = 0, column= 0, sticky="news")
-
-
-        self.code_bar = Canvas(self.container, width = 400, bg = "white")
-        self.code_bar.grid(row = 0, column = 1, sticky="nsew")
+        self.number_bar.grid(row = 2, column= 0, sticky="news")
+        
+        self.code_bar = Canvas(self.container, width = 300, bg = "white")
+        self.code_bar.grid(row = 2, column = 1, sticky="nsew")
        
         self.scroll = Scrollbar(self.container, orient=VERTICAL, command=self.scroll_both)
-        self.scroll.grid(row=0, column=2, sticky="ns")
+        self.scroll.grid(row=2, column=2, sticky="ns")
+        
         self.code_bar.configure(yscrollcommand=self.scroll.set)
         self.number_bar.configure(yscrollcommand=self.scroll.set)
-
-
-        self.open_button = Button(self.container, text="Open File", command=self.open_file)
-        self.open_button.grid(row = 0, column = 3)
-       
         self.code_bar.bind_all("<MouseWheel>", self.mouse_scroll)
         self.number_bar.bind_all("<MouseWheel>", self.mouse_scroll)
+
+        self.button_container = Frame(self.container)
+        self.button_container.grid(row=2, column= 3, sticky="news")
+        
+        self.open_button = Button(self.button_container, text="Open File", command=self.open_file)
+        self.open_button.grid(row = 0, column = 0, columnspan= 2)
+        
+        self.redundant = Button(self.button_container, text = "remove redundant code")
+        self.redundant.grid(row = 1, column= 1)
+        
+        self.retract_inp = Entry(self.button_container, text = "enter retraction height")
+        self.retract_inp.grid(row= 2, column= 0)
+        self.retract_button = Button(self.button_container, text = "set retraction height")
+        self.retract_button.grid(row = 2, column= 1)
+       
+        
+        
+        
         
     def mouse_scroll(self,event):
         if event.delta:
