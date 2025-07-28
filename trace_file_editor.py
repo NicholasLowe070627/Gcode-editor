@@ -74,17 +74,22 @@ class trace_editor():
         self.RPM_button = Button(self.button_container, text = "set Drill RPM")
         self.RPM_button.grid(row = 4, column= 1, sticky="news", padx=10, pady=5)
         
-        self.carrige_speed_inp = Entry(self.button_container)
-        self.carrige_speed_inp.grid(row= 5, column= 0, sticky="news", padx=10, pady=5)
-        self.carrige_speed_button = Button(self.button_container, text = "set carrige speed")
-        self.carrige_speed_button.grid(row = 5, column= 1, sticky="news", padx=10, pady=5)
+        self.retraction_speed_inp = Entry(self.button_container)
+        self.retraction_speed_inp.grid(row= 5, column= 0, sticky="news", padx=10, pady=5)
+        self.retraction_speed_button = Button(self.button_container, text = "set retraction speed")
+        self.retraction_speed_button.grid(row = 5, column= 1, sticky="news", padx=10, pady=5)
+        
+        self.trace_depth_inp = Entry(self.button_container)
+        self.trace_depth_inp.grid(row= 6, column= 0, sticky="news", padx=10, pady=5)
+        self.trace_depth_button = Button(self.button_container, text = "set trace depth")
+        self.trace_depth_button.grid(row = 6, column= 1, sticky="news", padx=10, pady=5)
         
         self.new_name = Label(self.button_container, text = "New file name", font = self.style)
-        self.new_name.grid(row = 6, column= 0, sticky="news", padx=10, pady=5)
+        self.new_name.grid(row = 7, column= 0, sticky="news", padx=10, pady=5)
         self.new_name_inp = Entry(self.button_container)
-        self.new_name_inp.grid(row= 7, column= 0, sticky="news", padx=10, pady=5)
+        self.new_name_inp.grid(row= 8, column= 0, sticky="news", padx=10, pady=5)
         self.new_name_button = Button(self.button_container, text = "Export as new file")
-        self.new_name_button.grid(row = 7, column= 1, sticky="news", padx=10, pady=5)
+        self.new_name_button.grid(row = 8, column= 1, sticky="news", padx=10, pady=5)
         
         
     def mouse_scroll(self,event):
@@ -133,13 +138,23 @@ class trace_editor():
         self.number_bar.configure(scrollregion=(0, 0, 50, y))
     
     def remove(self):
-        for i in self.lines:
-            if i == "MO3":
+        self.remove_index = []
+        self.defult = ["G21", "G90", "G00 Z2.5400"]
+        for index,i in enumerate(self.lines):
+            if i == "M03":
+                self.lines = self.lines[index:]
                 break
-            else:
-                self.lines.remove(i)
+            
+        for i in self.defult[::-1]:
+            self.lines.insert(0,i)
         self.display()   
-  
+    
+    def add(self):
+        pass
+        
+    def change(self):
+        pass
+    
     def run(self):
         self.root.mainloop()
        
