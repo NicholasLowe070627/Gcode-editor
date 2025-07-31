@@ -68,7 +68,7 @@ class trace_editor():
        
         self.RPM_inp = Entry(self.button_container)
         self.RPM_inp.grid(row= 4, column= 0, sticky="news", padx=10, pady=5)
-        self.RPM_button = Button(self.button_container, text = "set Drill RPM")
+        self.RPM_button = Button(self.button_container, text = "set Drill RPM", command = lambda: self.add("M03", self.RPM_inp.get()))
         self.RPM_button.grid(row = 4, column= 1, sticky="news", padx=10, pady=5)
        
         self.drill_speed_inp = Entry(self.button_container)
@@ -85,7 +85,7 @@ class trace_editor():
         self.new_name.grid(row = 7, column= 0, sticky="news", padx=10, pady=5)
         self.new_name_inp = Entry(self.button_container)
         self.new_name_inp.grid(row= 8, column= 0, sticky="news", padx=10, pady=5)
-        self.new_name_button = Button(self.button_container, text = "Export as new file")
+        self.new_name_button = Button(self.button_container, text = "Export as new file", command = lambda: self.export(self.new_name_inp.get()))
         self.new_name_button.grid(row = 8, column= 1, sticky="news", padx=10, pady=5)
        
        
@@ -126,35 +126,42 @@ class trace_editor():
         # Draw vertical separator line in number_bar
         self.number_bar.create_line(49, 0, 49, y, fill="black")
 
-
-
-
         # Update scroll region so scrollbars work correctly
         self.code_bar.configure(scrollregion=(0, 0, 400, y))
         self.number_bar.configure(scrollregion=(0, 0, 50, y))
    
     def remove(self):
-        self.remove_index = []
         self.defult = ["G21", "G90", "G00 X0.0000 Y0.0000", "G00 Z2.5400"]
         for index, i in enumerate(self.lines):
             if i == "M03":
                 self.lines = self.lines[index:]
                 break
-             
+            
+        for index, i in enumerate(self.lines):
+            if i[:5] == "G01 F":    
+                self.lines[index] = ""
+
         for i in self.defult[::-1]:
             self.lines.insert(0,i)
+            
+        while "" in self.lines:
+            self.lines.remove("")
         self.display()  
    
-    def add(self, prefix, feed_rate):
+    def add(self, prefix, value):
         if prefix == "G01 Z":
             for index, i in enumerate(self.lines):
                 if i.startswith(prefix):
-                    self.lines[index] += f" F{feed_rate}"
+                    self.lines[index] += f" F{value}"
                     
         elif prefix == "G01 X":
             for index, i in enumerate(self.lines):
                 if i.startswith("G01 Z"):
-                    self.lines[index + 1] += f" F{feed_rate}"
+                    self.lines[index + 1] += f" F{value}"
+        elif prefix == "M03":
+            for index, i in enumerate(self.lines):
+                if i.startswith(prefix):
+                    self.lines[index] += f" S{value}"
         self.display()
        
     def change(self, edit):
@@ -173,17 +180,25 @@ class trace_editor():
         self.display()
         
     def has_feed(self, axis, feed_rate):
-        self.checked_lines = []
-        self.lines_with_feed = []
         self.prefix = f"G01 {axis}"
         for index, i in enumerate(self.lines):
             if i.startswith(self.prefix):
                 words = i.split()    
-                if len(words) >= 2:
-                        self.lines[index] = " ". join(words[:2])
+                if len(words) >= 3:
+                        self.lines[index] = " ". join(words[:3])
 
         self.add(self.prefix, feed_rate)  
-        
+    
+    def export(self, default_name):
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            initialfile=default_name if default_name.endswith(".txt") else f"{default_name}.txt",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
+        )
+        if file_path:
+            with open(file_path, "w") as file:
+                file.write("\n".join(self.lines))
+            
     def run(self):
         self.root.mainloop()
        
