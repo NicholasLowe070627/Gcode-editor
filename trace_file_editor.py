@@ -6,13 +6,8 @@ version 1
 """
 
 
-
-
 from tkinter import *
 from tkinter import filedialog
-
-
-
 
 class trace_editor():
     def __init__(self):
@@ -30,11 +25,8 @@ class trace_editor():
         self.container.columnconfigure(1, weight=3)
         self.container.columnconfigure(3, weight =2 )
        
-       
-       
         self.title = Label(self.container, text = "Trace file editor", font = self.style)
         self.title.grid(row = 0, column= 1, columnspan = 4)
-
 
         self.spacer = Frame(self.container, bg = "black")
         self.spacer.grid(row =1 ,column=0, columnspan= 4, sticky= "news")
@@ -52,7 +44,6 @@ class trace_editor():
         self.number_bar.configure(yscrollcommand=self.scroll.set)
         self.code_bar.bind_all("<MouseWheel>", self.mouse_scroll)
         self.number_bar.bind_all("<MouseWheel>", self.mouse_scroll)
-
 
         self.button_container = Frame(self.container)
         self.button_container.grid(row=2, column= 3, sticky="news")
@@ -72,7 +63,7 @@ class trace_editor():
        
         self.trace_feed_inp = Entry(self.button_container)
         self.trace_feed_inp.grid(row= 3, column= 0, sticky="news", padx=10, pady=5)
-        self.trace_feed_button = Button(self.button_container, text = "set trace feed rate", command = lambda: self.change(f"G01 X"))
+        self.trace_feed_button = Button(self.button_container, text = "set trace feed rate", command = lambda: self.has_feed("X", self.trace_feed_inp.get()))
         self.trace_feed_button.grid(row = 3, column= 1, sticky="news", padx=10, pady=5)
        
         self.RPM_inp = Entry(self.button_container)
@@ -82,12 +73,12 @@ class trace_editor():
        
         self.drill_speed_inp = Entry(self.button_container)
         self.drill_speed_inp.grid(row= 5, column= 0, sticky="news", padx=10, pady=5)
-        self.drill_speed_button = Button(self.button_container, text = "set drill speed", command= lambda: self.has_feed(f"G01 Z-{self.drill_speed_inp.get()}"))
+        self.drill_speed_button = Button(self.button_container, text = "set drill speed", command= lambda: self.has_feed("Z",self.drill_speed_inp.get()))
         self.drill_speed_button.grid(row = 5, column= 1, sticky="news", padx=10, pady=5)
        
         self.trace_depth_inp = Entry(self.button_container)
         self.trace_depth_inp.grid(row= 6, column= 0, sticky="news", padx=10, pady=5)
-        self.trace_depth_button = Button(self.button_container, text = "set trace depth")
+        self.trace_depth_button = Button(self.button_container, text = "set trace depth", command = lambda: self.change(f"G01 Z-{self.trace_depth_inp.get()}"))
         self.trace_depth_button.grid(row = 6, column= 1, sticky="news", padx=10, pady=5)
        
         self.new_name = Label(self.button_container, text = "New file name", font = self.style)
@@ -126,22 +117,16 @@ class trace_editor():
         self.number_bar.delete("all")
         line_height = 20
         y = 0
-
-
         for i, line in enumerate(self.lines):
             # Draw code line
             self.code_bar.create_text(5, y, anchor="nw", text=line, font="Arial 12")
-
-
             # Draw corresponding line number
             self.number_bar.create_text(5, y, anchor="nw", text=str(i + 1), font="Arial 12")
-
-
             y += line_height
-
-
         # Draw vertical separator line in number_bar
         self.number_bar.create_line(49, 0, 49, y, fill="black")
+
+
 
 
         # Update scroll region so scrollbars work correctly
@@ -150,7 +135,7 @@ class trace_editor():
    
     def remove(self):
         self.remove_index = []
-        self.defult = ["G21", "G90", "G00 Z2.5400"]
+        self.defult = ["G21", "G90", "G00 X0.0000 Y0.0000", "G00 Z2.5400"]
         for index, i in enumerate(self.lines):
             if i == "M03":
                 self.lines = self.lines[index:]
@@ -160,48 +145,49 @@ class trace_editor():
             self.lines.insert(0,i)
         self.display()  
    
-    def add(self):
-        pass
+    def add(self, prefix, feed_rate):
+        if prefix == "G01 Z":
+            for index, i in enumerate(self.lines):
+                if i.startswith(prefix):
+                    self.lines[index] += f" F{feed_rate}"
+                    
+        elif prefix == "G01 X":
+            for index, i in enumerate(self.lines):
+                if i.startswith("G01 Z"):
+                    self.lines[index + 1] += f" F{feed_rate}"
+        self.display()
        
-    def change(self, change):
-        self.change_index = []
-        self.change_index.clear()
-
-
-        if change[0:3] == "G00 Z":
-            self.prefix = "G00 Z"
-        elif change[0:3] == "G01 Z":
-            self.prefix = "G01 Z"    
+    def change(self, edit):
+        
+        if edit.startswith("G00 Z"):
+            prefix = "G00 Z"
+        elif edit.startswith("G01 Z"):
+            prefix = "G01 Z"    
        
+        new_edit = edit.split()[1]
         for index, i in enumerate(self.lines):
-            if i == self.prefix:
-                self.change_index.append(index)
-        for i in self.change_index:
-            self.lines[i][4:] = change[4:]
-   
-    def has_feed(self, inp):
+            if i.startswith(prefix):
+                line_parts = i.split()
+                line_parts[1] = new_edit
+                self.lines[index] = " ".join(line_parts)
+        self.display()
+        
+    def has_feed(self, axis, feed_rate):
         self.checked_lines = []
         self.lines_with_feed = []
-        if inp[0:3] == "G01 X":
-            self.search_for = "G01 X"
-            
+        self.prefix = f"G01 {axis}"
         for index, i in enumerate(self.lines):
-            if i[0:3] == self.search_for:
+            if i.startswith(self.prefix):
                 words = i.split()    
                 if len(words) >= 2:
                         self.lines[index] = " ". join(words[:2])
-               
-        self.display()
 
-
+        self.add(self.prefix, feed_rate)  
+        
     def run(self):
         self.root.mainloop()
        
 if __name__ == "__main__":
     convert = trace_editor()
     convert.run()
-
-
-
-
 
