@@ -6,14 +6,17 @@ version 1
 only edits the drill file and has no validation
 """
 
+
 from tkinter import *
 from tkinter import filedialog
 
 
-class trace_editor():
+
+
+class drill_editor():
     def __init__(self):
         self.root = Tk()
-        self.root.title("trace file editor")
+        self.root.title("drill file editor")
         self.root.geometry("800x800")
         self.root.rowconfigure(0, weight = 1)
         self.root.columnconfigure(0, weight = 1)
@@ -28,6 +31,8 @@ class trace_editor():
        
         self.title = Label(self.container, text = "Trace file editor", font = self.style)
         self.title.grid(row = 0, column= 1, columnspan = 4)
+
+
 
 
         self.spacer = Frame(self.container, bg = "black")
@@ -46,7 +51,6 @@ class trace_editor():
         self.number_bar.configure(yscrollcommand=self.scroll.set)
         self.code_bar.bind_all("<MouseWheel>", self.mouse_scroll)
         self.number_bar.bind_all("<MouseWheel>", self.mouse_scroll)
-
 
         self.button_container = Frame(self.container)
         self.button_container.grid(row=2, column= 3, sticky="news")
@@ -71,13 +75,14 @@ class trace_editor():
        
         self.drill_deph_inp = Entry(self.button_container)
         self.drill_deph_inp.grid(row= 4, column= 0, sticky="news", padx=10, pady=5)
-        self.drill_deph_button = Button(self.button_container, text = "set Drill RPM", command = lambda: self.has_feed("Z", self.RPM_inp.get()))
+        self.drill_deph_button = Button(self.button_container, text = "set Drill deph", command = lambda: self.has_feed("Z", f"-{self.drill_deph_inp.get()}"))
         self.drill_deph_button.grid(row = 4, column= 1, sticky="news", padx=10, pady=5)
-        
+       
         self.drill_speed_inp = Entry(self.button_container)
         self.drill_speed_inp.grid(row= 5, column= 0, sticky="news", padx=10, pady=5)
         self.drill_speed_button = Button(self.button_container, text = "set drill speed", command= lambda: self.has_feed("F",self.drill_speed_inp.get()))
         self.drill_speed_button.grid(row = 5, column= 1, sticky="news", padx=10, pady=5)
+
 
         self.new_name = Label(self.button_container, text = "New file name", font = self.style)
         self.new_name.grid(row = 7, column= 0, sticky="news", padx=10, pady=5)
@@ -124,7 +129,6 @@ class trace_editor():
         # Draw vertical separator line in number_bar
         self.number_bar.create_line(49, 0, 49, y, fill="black")
 
-
         # Update scroll region so scrollbars work correctly
         self.code_bar.configure(scrollregion=(0, 0, 400, y))
         self.number_bar.configure(scrollregion=(0, 0, 50, y))
@@ -141,11 +145,10 @@ class trace_editor():
             if i[:5] == "G01 F":    
                 self.lines[index] = ""
 
-
         for index, i in enumerate(self.lines):
             if i.startswith(tuple(remove_lines)):
                 self.lines[index] = ""
-        
+       
         for index, i in enumerate(self.lines):
             if i.startswith("G00"):
                 line_component = i.split()
@@ -159,20 +162,19 @@ class trace_editor():
             self.lines.remove("")
         self.display()  
    
-    def add(self, prefix, value):
-        if prefix == "G01 Z":
-            for index, i in enumerate(self.lines):
-                if i.startswith(prefix):
-                    self.lines[index] += f" F{value}"
-                   
-        elif prefix == "G01 X":
-            for index, i in enumerate(self.lines):
-                if i.startswith("G01 Z"):
-                    self.lines[index + 1] += f" F{value}"
-        elif prefix == "M03":
-            for index, i in enumerate(self.lines):
-                if i.startswith(prefix):
-                    self.lines[index] += f" S{value}"
+    def add(self, command, value):
+        if command == "R":
+            command_index = 5
+        elif command == "F":
+            command_index = 4
+        elif command == "Z":
+            command_index = 3
+       
+        for index, i in enumerate(self.lines):
+            if i.startswith("G82"):
+                words = i.split()
+                words.insert(command_index, f"{command}{value}")
+                self.lines[index] = " ".join(words)
         self.display()
         
     def has_feed(self, command, value):
@@ -185,23 +187,9 @@ class trace_editor():
                         words.pop(index2)
                         self.lines[index] = " ".join(words)
 
-        self.add(self.prefix, command, value)  
-          
-    """def change(self, edit):
-       
-        if edit.startswith("G00 Z"):
-            prefix = "G00 Z"
-        elif edit.startswith("G01 Z"):
-            prefix = "G01 Z"    
-       
-        new_edit = edit.split()[1]
-        for index, i in enumerate(self.lines):
-            if i.startswith(prefix):
-                line_parts = i.split()
-                line_parts[1] = new_edit
-                self.lines[index] = " ".join(line_parts)
-        self.display()"""
-       
+
+        self.add(command, value)  
+         
     def export(self, default_name):
         file_path = filedialog.asksaveasfilename(
             defaultextension=".txt",
@@ -216,10 +204,5 @@ class trace_editor():
         self.root.mainloop()
        
 if __name__ == "__main__":
-    convert = trace_editor()
+    convert = drill_editor()
     convert.run()
-
-
-
-
-
