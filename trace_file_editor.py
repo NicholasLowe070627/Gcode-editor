@@ -89,8 +89,15 @@ class trace_editor():
         self.new_name_button = Button(self.button_container, text = "Export as new file", command = lambda: self.export(self.new_name_inp.get()))
         self.new_name_button.grid(row = 8, column= 1, sticky="news", padx=10, pady=5)
        
-        self.return_button = Button(self.button_container, text = "Home", font = self.style)
-        self.return_button.grid(row = 9, column = 1, sticky="news", padx=10, pady=5)       
+        self.button_container.rowconfigure(9, weight=1)
+        self.return_button = Button(self.button_container, text="Home", font=self.style, command=self.home, bg = "#FF6666")
+        self.return_button.grid(row=10, column=1, sticky="se", padx=10, pady=10)     
+        
+    def home(self):
+        from homepage import home_page
+        home_page()
+        self.root.destroy()
+    
     def mouse_scroll(self,event):
         if event.delta:
             self.code_bar.yview_scroll(int(-1 * (event.delta / 120)), "units")

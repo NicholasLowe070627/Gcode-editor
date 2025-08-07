@@ -1,7 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
-from trace_file_editor import trace_editor
-from drill_editor_v1 import drill_editor
+
 
 class home_page():
     def __init__(self):
@@ -27,8 +26,9 @@ class home_page():
         self.drill_button.grid(row = 2, column=1, sticky="news", padx = 60, pady= 40)
     
     def open_editor(self, file_type):
+        from trace_file_editor import trace_editor
+        from drill_editor_v1 import drill_editor
         self.root.withdraw()
-        
         if file_type == "trace":
             trace_editor() 
         elif file_type == "drill":

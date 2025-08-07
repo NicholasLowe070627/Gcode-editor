@@ -25,7 +25,7 @@ class drill_editor():
         self.container.columnconfigure(1, weight=3)
         self.container.columnconfigure(3, weight =2 )
        
-        self.title = Label(self.container, text = "Trace file editor", font = self.style)
+        self.title = Label(self.container, text = "Drill file editor", font = self.style)
         self.title.grid(row = 0, column= 1, columnspan = 4)
 
         self.spacer = Frame(self.container, bg = "black")
@@ -82,7 +82,15 @@ class drill_editor():
         self.new_name_inp.grid(row= 8, column= 0, sticky="news", padx=10, pady=5)
         self.new_name_button = Button(self.button_container, text = "Export as new file", command = lambda: self.export(self.new_name_inp.get()))
         self.new_name_button.grid(row = 8, column= 1, sticky="news", padx=10, pady=5)
-       
+        
+        self.button_container.rowconfigure(9, weight=1)
+        self.return_button = Button(self.button_container, text="Home", font=self.style, command=self.home, bg = "#FF6666")
+        self.return_button.grid(row=10, column=1, sticky="se", padx=10, pady=10)     
+        
+    def home(self):
+        from homepage import home_page
+        home_page()
+        self.root.destroy()
        
     def mouse_scroll(self,event):
         if event.delta:
