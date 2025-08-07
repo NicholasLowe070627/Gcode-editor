@@ -3,15 +3,16 @@ G code editor
 By Nicholas Lowe
 a G code editor that takes G code from flatcam and allows the user to change it to compatible g code for the roland CNC machine
 version 1
+only edits the trace file and has no validation
 """
-
-
 from tkinter import *
 from tkinter import filedialog
 
+
+
 class trace_editor():
-    def __init__(self):
-        self.root = Tk()
+    def __init__(self, parent=None):
+        self.root = Toplevel(parent)
         self.root.title("trace file editor")
         self.root.geometry("800x800")
         self.root.rowconfigure(0, weight = 1)
@@ -88,7 +89,8 @@ class trace_editor():
         self.new_name_button = Button(self.button_container, text = "Export as new file", command = lambda: self.export(self.new_name_inp.get()))
         self.new_name_button.grid(row = 8, column= 1, sticky="news", padx=10, pady=5)
        
-       
+        self.return_button = Button(self.button_container, text = "Home", font = self.style)
+        self.return_button.grid(row = 9, column = 1, sticky="news", padx=10, pady=5)       
     def mouse_scroll(self,event):
         if event.delta:
             self.code_bar.yview_scroll(int(-1 * (event.delta / 120)), "units")
@@ -152,8 +154,7 @@ class trace_editor():
         if prefix == "G01 Z":
             for index, i in enumerate(self.lines):
                 if i.startswith(prefix):
-                    self.lines[index] += f" F{value}"
-                    
+                    self.lines[index] += f" F{value}"          
         elif prefix == "G01 X":
             for index, i in enumerate(self.lines):
                 if i.startswith("G01 Z"):
@@ -165,12 +166,10 @@ class trace_editor():
         self.display()
        
     def change(self, edit):
-        
         if edit.startswith("G00 Z"):
             prefix = "G00 Z"
         elif edit.startswith("G01 Z"):
             prefix = "G01 Z"    
-       
         new_edit = edit.split()[1]
         for index, i in enumerate(self.lines):
             if i.startswith(prefix):
@@ -186,15 +185,13 @@ class trace_editor():
                 words = i.split()    
                 if len(words) >= 3:
                         self.lines[index] = " ". join(words[:3])
-
         self.add(self.prefix, feed_rate)  
     
     def export(self, default_name):
         file_path = filedialog.asksaveasfilename(
             defaultextension=".txt",
             initialfile=default_name if default_name.endswith(".txt") else f"{default_name}.txt",
-            filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
-        )
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
         if file_path:
             with open(file_path, "w") as file:
                 file.write("\n".join(self.lines))
@@ -205,4 +202,3 @@ class trace_editor():
 if __name__ == "__main__":
     convert = trace_editor()
     convert.run()
-

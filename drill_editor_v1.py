@@ -6,16 +6,12 @@ version 1
 only edits the drill file and has no validation
 """
 
-
 from tkinter import *
 from tkinter import filedialog
 
-
-
-
 class drill_editor():
-    def __init__(self):
-        self.root = Tk()
+    def __init__(self, parent=None):
+        self.root = Toplevel(parent)
         self.root.title("drill file editor")
         self.root.geometry("800x800")
         self.root.rowconfigure(0, weight = 1)
@@ -31,9 +27,6 @@ class drill_editor():
        
         self.title = Label(self.container, text = "Trace file editor", font = self.style)
         self.title.grid(row = 0, column= 1, columnspan = 4)
-
-
-
 
         self.spacer = Frame(self.container, bg = "black")
         self.spacer.grid(row =1 ,column=0, columnspan= 4, sticky= "news")
@@ -82,7 +75,6 @@ class drill_editor():
         self.drill_speed_inp.grid(row= 5, column= 0, sticky="news", padx=10, pady=5)
         self.drill_speed_button = Button(self.button_container, text = "set drill speed", command= lambda: self.has_feed("F",self.drill_speed_inp.get()))
         self.drill_speed_button.grid(row = 5, column= 1, sticky="news", padx=10, pady=5)
-
 
         self.new_name = Label(self.button_container, text = "New file name", font = self.style)
         self.new_name.grid(row = 7, column= 0, sticky="news", padx=10, pady=5)
