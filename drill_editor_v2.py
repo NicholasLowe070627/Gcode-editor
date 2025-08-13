@@ -8,6 +8,7 @@ only edits the drill file and has no validation
 
 from tkinter import *
 from tkinter import filedialog
+from tkinter import messagebox
 
 class drill_editor():
     def __init__(self, parent=None):
@@ -17,7 +18,8 @@ class drill_editor():
         self.root.rowconfigure(0, weight = 1)
         self.root.columnconfigure(0, weight = 1)
         self.style = "Arial 12"
-       
+        self.root.protocol("WM_DELETE_WINDOW", self.on_exit)
+
         self.container = Frame(self.root)
         self.container.grid(sticky="news", row = 0, column = 0)
         self.container.rowconfigure(0, weight=1)
@@ -85,9 +87,14 @@ class drill_editor():
         self.return_button.grid(row=10, column=1, sticky="se", padx=10, pady=10)     
         self.open_file()
     def home(self):
-        from homepage_V2 import home_page
-        home_page()
-        self.root.destroy()
+        if messagebox.askokcancel("Return to home page", "Are you sure you want to return home?"):    
+            from homepage_V2 import home_page
+            home_page()
+            self.root.destroy()
+        
+    def on_exit(self):
+        if messagebox.askokcancel("Quit", "Are you sure you want to exit?"):
+            self.root.destroy()
        
     def mouse_scroll(self,event):
         if event.delta:
@@ -109,8 +116,10 @@ class drill_editor():
         if self.file_path:
             with open(self.file_path, "r") as file:
                 self.file_content = file.read()
-        self.lines = self.file_content.splitlines()
-        self.remove()
+            self.lines = self.file_content.splitlines()
+            self.remove()
+        else:
+            self.code_bar.create_text(5, 0, anchor = "nw", text = "No open file", font = "Arial 30")
        
     def display(self):    
         self.code_bar.delete("all")

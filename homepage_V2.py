@@ -11,7 +11,7 @@ class home_page():
         self.root.columnconfigure(0, weight = 1)
         self.root.columnconfigure(1, weight = 1)
         
-        self.title = Label(self.root, text = "G code editor for the roland CNC machine", font = "Arial 24")
+        self.title = Label(self.root, text = "G code editor for the roland SRM-20 CNC machine", font = "Arial 22")
         self.title.grid(row = 0, column= 0, columnspan= 2, sticky="news")
         
         self.subtitle = Label(self.root, text = "Which file would you like to edit", font = "Arial 20")
