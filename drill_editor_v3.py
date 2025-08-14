@@ -61,7 +61,7 @@ class drill_editor():
        
         self.actions = {
            "retract": ["Set retraction height", lambda entry: self.has_feed("R", entry.get())],
-           "RPM": ["Set Drill RPM", lambda entry: self.add("M03", entry.get())],
+           "RPM": ["Set Drill RPM", lambda entry: self.has_feed("S", entry.get())],
            "drill_depth": ["Set Drill Depth", lambda entry: self.has_feed("Z", f"-{entry.get()}")],
             "drill_speed": ["Set Drill Speed", lambda entry: self.has_feed("F", entry.get())],
         }
@@ -194,7 +194,10 @@ class drill_editor():
         self.display()
         
     def has_feed(self, command, value):
-        self.prefix = "G82"
+        if command in ["R", "F", "Z"]:
+            self.prefix = "G82"
+        elif command == "S":
+            self.prefix = "M03"
         for index, i in enumerate(self.lines):
             if i.startswith(self.prefix):
                 words = i.split()    

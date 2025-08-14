@@ -57,30 +57,27 @@ class trace_editor():
         self.open_button = Button(self.button_container, text="Open File", command=self.open_file)
         self.open_button.grid(row = 0, column = 0, columnspan= 2)
        
-        self.retract_inp = Entry(self.button_container)
-        self.retract_inp.grid(row= 2, column= 0, sticky="news", padx=10, pady=5)
-        self.retract_button = Button(self.button_container, text = "set retraction height", command = lambda: self.change("G00 Z", self.retract_inp.get()))
-        self.retract_button.grid(row = 2, column= 1, sticky="news", padx=10, pady=5)
        
-        self.trace_feed_inp = Entry(self.button_container)
-        self.trace_feed_inp.grid(row= 3, column= 0, sticky="news", padx=10, pady=5)
-        self.trace_feed_button = Button(self.button_container, text = "set trace feed rate", command = lambda: self.has_feed("X", self.trace_feed_inp.get()))
-        self.trace_feed_button.grid(row = 3, column= 1, sticky="news", padx=10, pady=5)
-       
-        self.RPM_inp = Entry(self.button_container)
-        self.RPM_inp.grid(row= 4, column= 0, sticky="news", padx=10, pady=5)
-        self.RPM_button = Button(self.button_container, text = "set Drill RPM", command = lambda: self.add("M03", self.RPM_inp.get()))
-        self.RPM_button.grid(row = 4, column= 1, sticky="news", padx=10, pady=5)
-       
-        self.drill_speed_inp = Entry(self.button_container)
-        self.drill_speed_inp.grid(row= 5, column= 0, sticky="news", padx=10, pady=5)
-        self.drill_speed_button = Button(self.button_container, text = "set drill speed", command= lambda: self.has_feed("Z",self.drill_speed_inp.get()))
-        self.drill_speed_button.grid(row = 5, column= 1, sticky="news", padx=10, pady=5)
-       
-        self.trace_depth_inp = Entry(self.button_container)
-        self.trace_depth_inp.grid(row= 6, column= 0, sticky="news", padx=10, pady=5)
-        self.trace_depth_button = Button(self.button_container, text = "set trace depth", command = lambda: self.change("G01 Z-", self.trace_depth_inp.get()))
-        self.trace_depth_button.grid(row = 6, column= 1, sticky="news", padx=10, pady=5)
+        self.actions = {
+            "retract": ["Set retraction height", lambda entry: self.change("G00 Z", entry.get())],
+            "trace_feed": ["Set trace feed rate", lambda entry: self.has_feed("X", entry.get())],
+            "RPM": ["Set Drill RPM", lambda entry: self.has_feed("S", entry.get())],
+            "drill_speed": ["Set drill speed", lambda entry: self.has_feed("Z", entry.get())],
+            "trace_depth": ["Set trace depth", lambda entry: self.change("G01 Z-", entry.get())],
+         }
+
+        for line_no, (name, (text, command)) in enumerate(self.actions.items(), start=2):
+            entry = Entry(self.button_container)
+            entry.grid(row=line_no, column=0, sticky="news", padx=10, pady=5)
+            setattr(self, f"{name}_inp", entry)
+
+            button = Button(
+                self.button_container,
+                text=text,
+                command=lambda e=entry, cmd=command: cmd(e)
+            )
+            button.grid(row=line_no, column=1, sticky="news", padx=10, pady=5)
+            setattr(self, f"{name}_button", button)
        
         self.new_name = Label(self.button_container, text = "New file name", font = self.style)
         self.new_name.grid(row = 7, column= 0, sticky="news", padx=10, pady=5)
@@ -179,7 +176,7 @@ class trace_editor():
                         self.lines[index + 1] += f" F{checked_value}"
             elif prefix == "M03":
                 for index, i in enumerate(self.lines):
-                    if i.startswith(prefix):
+                    if i.startswith("M03"):
                         self.lines[index] += f" S{checked_value}"
         else:
             return None
@@ -204,12 +201,19 @@ class trace_editor():
         self.display()
         
     def has_feed(self, axis, feed_rate):
-        self.prefix = f"G01 {axis}"
+        if axis in ["X", "Z"]:
+            self.prefix = f"G01 {axis}"
+            look_for = "F"
+        elif axis == "S":
+            self.prefix = "M03"
+            look_for = "S"
         for index, i in enumerate(self.lines):
             if i.startswith(self.prefix):
                 words = i.split()    
-                if len(words) >= 3:
-                        self.lines[index] = " ". join(words[:3])
+                for index2, y in enumerate(words):
+                    if y.startswith(look_for):
+                        words.pop(index2)
+                        self.lines[index] = " ".join(words)
         self.add(self.prefix, feed_rate)  
     
     def is_float(self, value):
