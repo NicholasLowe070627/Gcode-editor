@@ -60,10 +60,10 @@ class drill_editor():
        
        
         self.actions = {
-           "retract": ["Set retraction height", lambda entry: self.has_feed("R", entry.get(), 2, 130.75)],
-           "RPM": ["Set Drill RPM", lambda entry: self.has_feed("S", entry.get(), 3000, 7000)],
-           "drill_depth": ["Set Drill Depth", lambda entry: self.has_feed("Z", f"-{entry.get()}", -1,-3)],
-            "drill_speed": ["Set Drill Speed", lambda entry: self.has_feed("F", entry.get(), 50, 250)],
+           "retract": ["Set retraction height", lambda entry: self.has_feed("R", entry.get(), 2, 130.75, "Retraction height")],
+           "RPM": ["Set Drill RPM", lambda entry: self.has_feed("S", entry.get(), 3000, 7000, "RPM")],
+           "drill_depth": ["Set Drill Depth", lambda entry: self.has_feed("Z", entry.get(), -3,-1, "Drill Depth")],
+            "drill_speed": ["Set Drill Speed", lambda entry: self.has_feed("F", entry.get(), 50, 250, "Drill Speed")],
         }
        
         for line_no, (name, (text, command)) in enumerate(self.actions.items()):
@@ -117,7 +117,7 @@ class drill_editor():
                
         self.file_path = filedialog.askopenfilename(
             title = "Select a file  ",
-            filetypes = [("Text files", "*.txt"), ("All files", "*.*")]
+            filetypes = [("All files", "*.*"),("Text files", "*.txt")]
         )
         if self.file_path:
             with open(self.file_path, "r") as file:
@@ -170,14 +170,15 @@ class drill_editor():
             self.lines.remove("")
         self.display()  
    
-    def add(self, command, value, min, max):
+    def add(self, command, value, min, max, label):
         if command == "R":
             command_index = 5
         elif command == "F":
             command_index = 4
         elif command == "Z":
             command_index = 3
-        checked_value = self.is_float(value, min, max)
+            value = f"-{value}"
+        checked_value = self.is_float(value, min, max, label)
         if checked_value is not None:
             for index, i in enumerate(self.lines):
                 if i.startswith("G82") and command in ["R", "F", "Z"]:
@@ -193,7 +194,7 @@ class drill_editor():
             return None
         
         
-    def has_feed(self, command, value, min, max):
+    def has_feed(self, command, value, min, max, label):
         if command in ["R", "F", "Z"]:
             self.prefix = "G82"
         elif command == "S":
@@ -205,25 +206,26 @@ class drill_editor():
                     if y.startswith(command):
                         words.pop(index2)
                         self.lines[index] = " ".join(words)
-        self.add(command, value, min, max) 
+        self.add(command, value, min, max, label) 
          
-    def is_float(self, value, min, max):
+    def is_float(self, value, min, max, label):
         try:
             value = float(value)
             if value >= min and value <= max:
                 value = round(value, 4)
                 return value
             else:
+                messagebox.showerror("Invalid Input", f"Invalid Input. {label} must be between {min} and {max}")
                 return None
         except ValueError:
+            messagebox.showerror("Invalid Input", "Please enter a float")
             return None
         
     def export(self, default_name):
         file_path = filedialog.asksaveasfilename(
             defaultextension=".txt",
-            initialfile=default_name if default_name.endswith(".txt") else f"{default_name}.txt",
-            filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
-        )
+            initialfile=default_name if default_name.endswith(".nc") else f"{default_name}.nc",
+            filetypes=[("All files", "*.*"),("Text files", "*.txt")])
         if file_path:
             with open(file_path, "w") as file:
                 file.write("\n".join(self.lines))
