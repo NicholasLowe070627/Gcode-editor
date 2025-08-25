@@ -132,7 +132,7 @@ class drill_editor():
         #makes a file explore popup for the user to open the file      
         self.file_path = filedialog.askopenfilename(
             title = "Select a file  ",
-            filetypes = [("All files", "*.*"),("Text files", "*.txt")]
+            filetypes = [("All files", ".nc"),("Text files", "*.txt")]
         )
         #if a file is selected read the file and call the remove function
         if self.file_path:
