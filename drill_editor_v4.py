@@ -14,7 +14,7 @@ from tkinter import filedialog
 from tkinter import messagebox
 
 #Creates the editor in a class so it can be oppened from another file as a window
-class drill_editor():
+class DrillEditor():
     def __init__(self, parent=None):
         #Creates GUI
         self.root = Toplevel(parent)
@@ -35,7 +35,8 @@ class drill_editor():
         self.container.columnconfigure(3, weight =2 )
         
         #Creates all of the sections in the frame
-        self.title = Label(self.container, text = "Drill file editor", font = self.style)
+        self.title = Label(self.container, text = "Drill file editor",
+                           font = self.style)
         self.title.grid(row = 0, column= 1, columnspan = 4)
         self.spacer = Frame(self.container, bg = "black")
         self.spacer.grid(row =1 ,column=0, columnspan= 4, sticky= "news")
@@ -43,7 +44,8 @@ class drill_editor():
         self.number_bar.grid(row = 2, column= 0, sticky="news")
         self.code_bar = Canvas(self.container, width = 300, bg = "white")
         self.code_bar.grid(row = 2, column = 1, sticky="nsew")
-        self.scroll = Scrollbar(self.container, orient=VERTICAL, command=self.scroll_both)
+        self.scroll = Scrollbar(self.container, orient=VERTICAL,
+                                command=self.scroll_both)
         self.scroll.grid(row=2, column=2, sticky="ns")
        
         #sets the scroll bar and scroll wheel to scroll only the canvas and number bar
@@ -58,7 +60,8 @@ class drill_editor():
         self.button_container.columnconfigure(0, weight= 1, pad = 10)
         self.button_container.columnconfigure(1, weight= 1, pad = 10)
        
-        self.open_button = Button(self.button_container, text="Open File", command=self.open_file)
+        self.open_button = Button(self.button_container,
+                                  text="Open File", command=self.open_file)
         self.open_button.grid(row = 0, column = 0, columnspan= 2)
        
         #a dictionary containing all the infomation for the entries and corrosponding button
@@ -67,10 +70,14 @@ class drill_editor():
         #the index position 2 is the command
         #the command calls the corrosponding function and passes in the entry value and the minimun, maximun and label and the "command"
         self.actions = {
-           "retract": ["Set retraction height", lambda entry: self.has_feed("R", entry.get(), 2, 130.75, "Retraction height")],
-           "RPM": ["Set Drill RPM", lambda entry: self.has_feed("S", entry.get(), 3000, 7000, "RPM")],
-           "drill_depth": ["Set Drill Depth", lambda entry: self.has_feed("Z", entry.get(), -3,-1, "Drill Depth")],
-            "drill_speed": ["Set Drill Speed", lambda entry: self.has_feed("F", entry.get(), 50, 250, "Drill Speed")],
+           "retract": ["Set retraction height",
+                       lambda entry: self.has_command("R", entry.get(), 2, 130.75, "Retraction height")],
+           "RPM": ["Set Drill RPM",
+                   lambda entry: self.has_command("S", entry.get(), 3000, 7000, "RPM")],
+           "drill_depth": ["Set Drill Depth",
+                           lambda entry: self.has_command("Z", entry.get(), -3,-1, "Drill Depth")],
+            "drill_speed": ["Set Drill Speed",
+                            lambda entry: self.has_command("F", entry.get(), 50, 250, "Drill Speed")],
         }
         #loops through the dictionary and creates each of the entries and buttons
         for line_no, (name, (text, command)) in enumerate(self.actions.items()):
@@ -94,19 +101,22 @@ class drill_editor():
         self.new_name.grid(row = 7, column= 0, sticky="news", padx=10, pady=5)
         self.new_name_inp = Entry(self.button_container)
         self.new_name_inp.grid(row= 8, column= 0, sticky="news", padx=10, pady=5)
-        self.new_name_button = Button(self.button_container, text = "Export as new file", command = lambda: self.export(self.new_name_inp.get()))
+        self.new_name_button = Button(self.button_container, text = "Export as new file",
+                                      command = lambda: self.export(self.new_name_inp.get()))
         self.new_name_button.grid(row = 8, column= 1, sticky="news", padx=10, pady=5)
         #creates home button
         self.button_container.rowconfigure(9, weight=1)
-        self.return_button = Button(self.button_container, text="Home", font=self.style, command=self.home, bg = "#FF6666")
+        self.return_button = Button(self.button_container, text="Home",
+                                    font=self.style, command=self.home, bg = "#FF6666")
         self.return_button.grid(row=10, column=1, sticky="se", padx=10, pady=10)     
         self.open_file()
         
     def home(self):
         #displays a message box to check if the uiser wants to return home
-        if messagebox.askokcancel("Return to home page", "Are you sure you want to return home?"):    
-            from homepage_V4 import home_page
-            home_page()
+        if messagebox.askokcancel("Return to home page",
+                                  "Are you sure you want to return home?"):    
+            from homepage_V4 import HomePage
+            HomePage()
             self.root.destroy()
         
     def on_exit(self):
@@ -141,7 +151,8 @@ class drill_editor():
             self.lines = self.file_content.splitlines()
             self.remove()
         else:   #updates the canvas to show no file is open
-            self.code_bar.create_text(5, 0, anchor = "nw", text = "No open file", font = "Arial 30")
+            self.code_bar.create_text(5, 0, anchor = "nw",
+                                      text = "No open file", font = "Arial 30")
        
     def display(self):   
         #displays/updates the lines of code 
@@ -151,8 +162,10 @@ class drill_editor():
         y = 0
         #writes each line of code from the list self.lines on a new line and numbers them
         for i, line in enumerate(self.lines):
-            self.code_bar.create_text(5, y, anchor="nw", text=line, font="Arial 12")
-            self.number_bar.create_text(5, y, anchor="nw", text=str(i + 1), font="Arial 12")
+            self.code_bar.create_text(5, y, anchor="nw",
+                                      text=line, font="Arial 12")
+            self.number_bar.create_text(5, y, anchor="nw",
+                                        text=str(i + 1), font="Arial 12")
             y += line_height
         #Draw vertical separator line in number_bar
         self.number_bar.create_line(49, 0, 49, y, fill="black")
@@ -203,7 +216,7 @@ class drill_editor():
             command_index = 3
             value = f"-{value}"
             
-        checked_value = self.is_float(value, min, max, label)#calls the function to check if it is a valid input
+        checked_value = self.is_valid(value, min, max, label)#calls the function to check if it is a valid input
         if checked_value is not None:
             for index, i in enumerate(self.lines):
                 if i.startswith("G82") and command in ["R", "F", "Z"]: #for every line that starts with G82 add the corrosponding command and the value
@@ -219,7 +232,7 @@ class drill_editor():
         else:
             return None#as the checked value is returned as none if its invalid do nothing if this is true
         
-    def has_feed(self, command, value, min, max, label):
+    def has_command(self, command, value, min, max, label):
         #removes exisiting commands if it is present
         if command in ["R", "F", "Z"]: #if the command is in the list set prefix to G82
             self.prefix = "G82"
@@ -234,7 +247,7 @@ class drill_editor():
                         self.lines[index] = " ".join(words)
         self.add(command, value, min, max, label)  #calls the add function to add new command
          
-    def is_float(self, value, min, max, label):
+    def is_valid(self, value, min, max, label):
         #validates the users inputs
         try:
             value = float(value)#ensures the input is a float and between the minimun and maximun values
@@ -243,7 +256,8 @@ class drill_editor():
                 return value
             else:
                  #prints an error message if value is grater or less than min and max
-                messagebox.showerror("Invalid Input", f"Invalid Input. {label} must be between {min} and {max}")
+                messagebox.showerror("Invalid Input",
+                                     f"Invalid Input. {label} must be between {min} and {max}")
                 return None
         except ValueError:
             #prints an error message if invalid input
