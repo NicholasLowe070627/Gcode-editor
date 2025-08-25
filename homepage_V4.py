@@ -1,7 +1,19 @@
+"""
+G code editor
+By Nicholas Lowe
+a G code editor that takes G code from flatcam and allows the user to change it to compatible g code for the roland CNC machine
+version 4
+linked to the home page so the user can navigate thoughout the entire system. 
+has a confirmation to exit upon pressing close or the home button
+validates inputs to ensure the user input will function the machine and only allows floats and strings to be enetered
+"""
+#imports nessicary libraies
 from tkinter import *
 
+#Creates the editor in a class so it can be oppened from another file as a window
 class home_page():
     def __init__(self):
+        #Creates GUI
         self.root = Tk()
         self.root.title("G Code editor Home page")
         self.root.geometry("700x300")
@@ -16,20 +28,20 @@ class home_page():
         
         self.subtitle = Label(self.root, text = "Which file would you like to edit", font = "Arial 20")
         self.subtitle.grid(row = 1, column= 0, columnspan= 2, sticky="news")
-        
+        #buttons that allow the user to navigate to each of the editors
         self.trace_button = Button(self.root, text = "Trace File", bg = "#d9d9d9", font = "Arial 15", command = lambda: self.open_editor("trace"))
         self.trace_button.grid(row = 2, column= 0, sticky="news", padx = 60, pady= 40)
-        
         self.drill_button = Button(self.root, text = "Drill File", bg = "#d9d9d9", font = "Arial 15", command = lambda: self.open_editor("drill"))
         self.drill_button.grid(row = 2, column=1, sticky="news", padx = 60, pady= 40)
     
     def open_editor(self, file_type):
+        #function that opens each editor
         from trace_file_editor_V4 import trace_editor
         from drill_editor_v4 import drill_editor
-        self.root.withdraw()
-        if file_type == "trace":
+        self.root.withdraw() #withdraw the root as the program ends when root is destoryed
+        if file_type == "trace":#opens trace editor
             trace_editor() 
-        elif file_type == "drill":
+        elif file_type == "drill":#opens drill editor
             drill_editor() 
         
         
