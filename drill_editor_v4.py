@@ -75,7 +75,7 @@ class DrillEditor():
            "RPM": ["Set Drill RPM",
                    lambda entry: self.has_command("S", entry.get(), 3000, 7000, "RPM")],
            "drill_depth": ["Set Drill Depth",
-                           lambda entry: self.has_command("Z", entry.get(), -3,-1, "Drill Depth")],
+                           lambda entry: self.has_command("Z", entry.get(), 1,3, "Drill Depth")],
             "drill_speed": ["Set Drill Speed",
                             lambda entry: self.has_command("F", entry.get(), 50, 250, "Drill Speed")],
         }
@@ -214,7 +214,6 @@ class DrillEditor():
             command_index = 4
         elif command == "Z":
             command_index = 3
-            value = f"-{value}"
             
         checked_value = self.is_valid(value, min, max, label)#calls the function to check if it is a valid input
         if checked_value is not None:
@@ -226,7 +225,7 @@ class DrillEditor():
                     
                 elif i.startswith("M03") and command not in ["R", "F", "Z"]: #for non M03 commands and the speed value
                     words = i.split()
-                    words.insert(1, f"S{checked_value}")
+                    words.insert(1, f"S-{checked_value}")
                     self.lines[index] = " ".join(words)
             self.display()#calls the function to update canvas
         else:
@@ -257,11 +256,11 @@ class DrillEditor():
             else:
                  #prints an error message if value is grater or less than min and max
                 messagebox.showerror("Invalid Input",
-                                     f"Invalid Input. {label} must be between {min} and {max}")
+                                     f"Invalid Input. {label} must be or between {min} and {max}")
                 return None
         except ValueError:
             #prints an error message if invalid input
-            messagebox.showerror("Invalid Input", "Please enter a float")
+            messagebox.showerror("Invalid Input", "Please enter a float or int")
             return None
         
     def export(self, default_name):

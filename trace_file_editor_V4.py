@@ -260,12 +260,12 @@ class TraceEditor():
             else:
                 #prints an error message if value is grater or less than min and max
                 messagebox.showerror("Invalid Input",
-                                     f"Invalid Input. {label} must be between {min} and {max}") 
+                                     f"Invalid Input. {label} must be or between {min} and {max}") 
                 return None
         except ValueError:
             #prints an error message if invalid input
             messagebox.showerror("Invalid Input",
-                                 "Please enter a float")
+                                 "Please enter a float or int")
             return None
     
     def export(self, default_name):
