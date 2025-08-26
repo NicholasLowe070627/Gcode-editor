@@ -75,7 +75,7 @@ class DrillEditor():
            "RPM": ["Set Drill RPM",
                    lambda entry: self.has_command("S", entry.get(), 3000, 7000, "RPM")],
            "drill_depth": ["Set Drill Depth",
-                           lambda entry: self.has_command("Z", entry.get(), 3,1, "Drill Depth")],
+                           lambda entry: self.has_command("Z", entry.get(), 1,3, "Drill Depth")],
             "drill_speed": ["Set Drill Speed",
                             lambda entry: self.has_command("F", entry.get(), 50, 250, "Drill Speed")],
         }
@@ -214,19 +214,18 @@ class DrillEditor():
             command_index = 4
         elif command == "Z":
             command_index = 3
-            value = f"-{value}"
-            min = f"-{min}"
-            max = f"-{max}"
+            command = "Z-"
+            
             
         checked_value = self.is_valid(value, min, max, label)#calls the function to check if it is a valid input
         if checked_value is not None:
             for index, i in enumerate(self.lines):
-                if i.startswith("G82") and command in ["R", "F", "Z"]: #for every line that starts with G82 add the corrosponding command and the value
+                if i.startswith("G82") and command in ["R", "F", "Z-"]: #for every line that starts with G82 add the corrosponding command and the value
                     words = i.split()
                     words.insert(command_index, f"{command}{checked_value}")
                     self.lines[index] = " ".join(words)
                     
-                elif i.startswith("M03") and command not in ["R", "F", "Z"]: #for non M03 commands and the speed value
+                elif i.startswith("M03") and command not in ["R", "F", "Z-"]: #for non M03 commands and the speed value
                     words = i.split()
                     words.insert(1, f"S{checked_value}")
                     self.lines[index] = " ".join(words)
